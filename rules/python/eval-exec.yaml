@@ -1,0 +1,14 @@
+id: PY-EVAL-001
+language: python
+severity: high
+title: Use of eval() or exec()
+patterns:
+  - "\\beval\\s*\\("
+  - "\\bexec\\s*\\("
+description: >
+  eval() and exec() execute arbitrary Python code from a string. Combined
+  with any external input, this is equivalent to remote code execution.
+recommendation: >
+  Replace eval/exec with explicit parsing (ast.literal_eval for literals,
+  a proper expression parser, or a whitelist-based dispatch table).
+category: unsafe-eval

@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+dist/
+build/
+
+# Perl
+*.bak
+blib/
+pm_to_blib
+Build
+_build/
+cover_db/
+*.tmp
+
+# Environment / secrets
+.env
+*.env.local
+!.env.example
+
+# Reports (generated, keep samples only)
+reports/*.html
+reports/*.pdf
+reports/*.json
+!reports/samples/**
+
+# Data
+*.sqlite3
+*.db
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Node (dashboard, if Next.js chosen)
+node_modules/
+.next/

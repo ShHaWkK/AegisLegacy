@@ -1,0 +1,17 @@
+id: PERL-CMD-001
+language: perl
+severity: critical
+title: Potential command injection through system call
+patterns:
+  - "system\\s*\\("
+  - "`[^`]+`"
+  - "\\bexec\\s*\\("
+description: >
+  Detects use of system(), backticks or exec() to run external commands.
+  When any part of the command string is built from user input, this is a
+  classic vector for OS command injection.
+recommendation: >
+  Avoid shell interpolation entirely. Prefer list-form system(@args) which
+  bypasses the shell, validate/whitelist any input used to build the
+  command, and never concatenate untrusted data into a command string.
+category: command-injection

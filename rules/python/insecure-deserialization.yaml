@@ -1,0 +1,16 @@
+id: PY-DESERIAL-001
+language: python
+severity: high
+title: Insecure deserialization with pickle
+patterns:
+  - "pickle\\.loads?\\s*\\("
+  - "yaml\\.load\\s*\\((?!.*Loader=yaml\\.SafeLoader)"
+description: >
+  pickle.load/loads can execute arbitrary code while deserializing
+  attacker-controlled data. yaml.load() without an explicit SafeLoader has
+  the same class of issue.
+recommendation: >
+  Use json for untrusted data, or pickle only for data you fully trust and
+  control. For YAML, always pass Loader=yaml.SafeLoader (or use
+  yaml.safe_load).
+category: insecure-deserialization

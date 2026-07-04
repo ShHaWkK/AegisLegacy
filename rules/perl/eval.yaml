@@ -1,0 +1,15 @@
+id: PERL-EVAL-001
+language: perl
+severity: high
+title: Use of string eval
+patterns:
+  - "eval\\s*\\(?\\s*[\"']"
+  - "eval\\s+\\$"
+description: >
+  String eval() compiles and executes arbitrary Perl code at runtime. If
+  any of that string is influenced by external input, it is equivalent to
+  remote code execution.
+recommendation: >
+  Replace string eval with block eval { ... } for exception handling, or
+  restructure the logic to avoid dynamic code generation entirely.
+category: unsafe-eval

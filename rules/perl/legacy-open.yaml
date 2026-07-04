@@ -1,0 +1,15 @@
+id: PERL-OPEN-001
+language: perl
+severity: medium
+title: Two-argument open() with legacy file mode
+patterns:
+  - "open\\s*\\(?\\s*\\w+\\s*,\\s*[\"'][^\"']*[\"']\\s*\\)"
+description: >
+  Two-argument open() infers the file mode from the string and, if that
+  string is influenced by external input, can be abused to open pipes to
+  arbitrary commands (e.g. "somefile |"). It is also a well-known source of
+  hard-to-maintain legacy Perl.
+recommendation: >
+  Use three-argument open($fh, "<", $path) with an explicit mode, which
+  disables pipe interpretation entirely.
+category: legacy-pattern
