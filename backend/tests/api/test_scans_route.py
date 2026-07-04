@@ -39,7 +39,7 @@ def test_create_scan_returns_findings_and_score(client: TestClient, tmp_path: Pa
     body = response.json()
     assert body["findings_count"] == 1
     assert body["score"] == 90.0
-    assert body["classification"] == "Good"
+    assert body["classification"] == "Excellent"
     assert "id" in body
 
 
