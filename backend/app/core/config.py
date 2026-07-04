@@ -22,7 +22,7 @@ def _default_rules_dir() -> Path:
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="AEGIS_", env_file=".env", extra="ignore")
 
-    api_host: str = "0.0.0.0"
+    api_host: str = "0.0.0.0"  # noqa: S104 - intended to be reachable outside localhost by default
     api_port: int = 8000
     api_key: str = "changeme-local-dev-key"
 

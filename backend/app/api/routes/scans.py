@@ -7,11 +7,21 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from app.api.deps import get_repository, require_api_key
 from app.api.schemas import FindingRead, Page, ScanCreate, ScanRead, ScoreRead
 from app.core.config import Settings, get_settings
+from app.repositories.models import ScanRecord
 from app.repositories.scan_repository import ScanRepository
 from app.rules.loader import RuleLoadError
 from app.services.scan_service import ScanTargetNotFoundError, run_scan
 
 router = APIRouter(prefix="/scans", tags=["scans"])
+
+
+def _get_scan_or_404(scan_id: int, repository: ScanRepository) -> ScanRecord:
+    scan = repository.get_scan(scan_id)
+    if scan is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Scan {scan_id} not found"
+        )
+    return scan
 
 
 @router.post(
@@ -60,9 +70,7 @@ def list_scans(
 
 @router.get("/{scan_id}", response_model=ScanRead)
 def get_scan(scan_id: int, repository: ScanRepository = Depends(get_repository)) -> ScanRead:
-    scan = repository.get_scan(scan_id)
-    if scan is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Scan {scan_id} not found")
+    scan = _get_scan_or_404(scan_id, repository)
     return ScanRead.model_validate(scan)
 
 
@@ -70,10 +78,7 @@ def get_scan(scan_id: int, repository: ScanRepository = Depends(get_repository))
 def get_scan_findings(
     scan_id: int, repository: ScanRepository = Depends(get_repository)
 ) -> list[FindingRead]:
-    scan = repository.get_scan(scan_id)
-    if scan is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Scan {scan_id} not found")
-
+    _get_scan_or_404(scan_id, repository)
     findings = repository.get_findings(scan_id)
     return [FindingRead.model_validate(finding) for finding in findings]
 
@@ -82,10 +87,7 @@ def get_scan_findings(
 def get_scan_score(
     scan_id: int, repository: ScanRepository = Depends(get_repository)
 ) -> ScoreRead:
-    scan = repository.get_scan(scan_id)
-    if scan is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Scan {scan_id} not found")
-
+    scan = _get_scan_or_404(scan_id, repository)
     return ScoreRead(
         score=scan.score, classification=scan.classification, findings_count=scan.findings_count
     )

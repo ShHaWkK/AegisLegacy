@@ -8,7 +8,7 @@ business logic.
 
 from __future__ import annotations
 
-from sqlmodel import Session, func, select
+from sqlmodel import Session, col, func, select
 
 from app.repositories.models import FindingRecord, ScanRecord
 
@@ -43,7 +43,10 @@ class ScanRepository:
     def list_scans(self, *, offset: int, limit: int) -> tuple[list[ScanRecord], int]:
         total = self._session.exec(select(func.count()).select_from(ScanRecord)).one()
         statement = (
-            select(ScanRecord).order_by(ScanRecord.created_at.desc()).offset(offset).limit(limit)
+            select(ScanRecord)
+            .order_by(col(ScanRecord.created_at).desc())
+            .offset(offset)
+            .limit(limit)
         )
         items = list(self._session.exec(statement))
         return items, total

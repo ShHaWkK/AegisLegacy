@@ -38,5 +38,5 @@ def configure_logging(*, level: str = "INFO", json_format: bool = True) -> None:
     )
 
 
-def get_logger(name: str) -> structlog.stdlib.BoundLogger:
-    return structlog.get_logger(name)
+def get_logger(name: str) -> structlog.typing.FilteringBoundLogger:
+    return structlog.get_logger(name)  # type: ignore[no-any-return]
