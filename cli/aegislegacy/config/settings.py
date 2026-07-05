@@ -1,9 +1,8 @@
-"""Resolves CLI settings from explicit flags, environment, then defaults.
+"""Résout la config du CLI : flag explicite, puis variable d'env, puis défaut.
 
-Precedence (highest first): an explicit --rules-dir flag, the
-AEGIS_RULES_DIR environment variable, then the repo-relative rules/
-directory (works out of the box for anyone running the CLI from a checkout
-of this monorepo).
+Ordre de priorité (le premier trouvé gagne) : --rules-dir, la variable
+d'environnement AEGIS_RULES_DIR, puis le dossier rules/ du monorepo
+(fonctionne directement pour qui lance le CLI depuis ce repo).
 """
 
 from __future__ import annotations
@@ -11,16 +10,12 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from app.rules.paths import default_rules_dir
 from pydantic import BaseModel
 
 
 class Settings(BaseModel):
     rules_dir: Path
-
-
-def default_rules_dir() -> Path:
-    """The rules/ directory at the root of this monorepo checkout."""
-    return Path(__file__).resolve().parents[3] / "rules"
 
 
 def load_settings(rules_dir: Path | None = None) -> Settings:

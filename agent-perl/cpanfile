@@ -1,0 +1,16 @@
+requires 'perl', '5.016';
+
+# Tous les modules ci-dessous sont des modules cœur de Perl (livrés avec
+# perl depuis 5.14) : aucune dépendance externe à installer via cpan pour
+# faire tourner l'agent.
+requires 'File::Find';
+requires 'File::Spec';
+requires 'FindBin';
+requires 'Digest::SHA';
+requires 'JSON::PP';
+requires 'HTTP::Tiny';
+requires 'Getopt::Long';
+
+on 'test' => sub {
+    requires 'Test::More';
+};

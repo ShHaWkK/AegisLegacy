@@ -26,7 +26,7 @@ SEVERITY_WEIGHTS: dict[Severity, float] = {
     Severity.INFO: 0.5,
 }
 
-# Order used for sorting findings from most to least severe.
+# Order used for sorting findings from most to least severe
 SEVERITY_ORDER: tuple[Severity, ...] = (
     Severity.CRITICAL,
     Severity.HIGH,

@@ -16,7 +16,7 @@ test-python:
 	pytest cli/tests
 
 test-perl:
-	@echo "Perl agent tests: see agent-perl/t (run 'prove -l agent-perl/t' once agent-perl is implemented)."
+	cd agent-perl && prove -l t/
 
 lint:
 	cd backend && ruff check .
@@ -35,22 +35,22 @@ security:
 	cd backend && pip-audit
 
 run-api:
-	@echo "Backend API not implemented yet in this iteration (see ROADMAP.md)."
+	cd backend && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 run-worker:
-	@echo "Worker not implemented yet in this iteration (core edition has no Celery/RQ, see ROADMAP.md)."
+	@echo "Le worker n'est pas encore implémenté dans cette itération (l'édition core n'inclut pas Celery/RQ, voir ROADMAP.md)."
 
 scan-demo:
-	@echo "demo-legacy-app fixtures are not implemented yet. In the meantime, run: aegis scan <path-to-any-legacy-project>"
+	@echo "Les fixtures demo-legacy-app ne sont pas encore implémentées. En attendant, exécutez : aegis scan <path-to-any-legacy-project>"
 
 report-demo:
 	@echo "HTML report generation not implemented yet in this iteration (see ROADMAP.md)."
 
 docker-up:
-	@echo "No docker-compose.yml in the core edition (no Postgres/Redis/Celery, see ROADMAP.md)."
+	@echo "Aucun docker-compose.yml dans l'édition core (pas de Postgres/Redis/Celery, voir ROADMAP.md)."
 
 docker-down:
-	@echo "No docker-compose.yml in the core edition (no Postgres/Redis/Celery, see ROADMAP.md)."
+	@echo "Aucun docker-compose.yml dans l'édition core (pas de Postgres/Redis/Celery, voir ROADMAP.md)."
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +

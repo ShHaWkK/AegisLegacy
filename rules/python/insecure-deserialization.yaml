@@ -4,7 +4,7 @@ severity: high
 title: Insecure deserialization with pickle
 patterns:
   - "pickle\\.loads?\\s*\\("
-  - "yaml\\.load\\s*\\((?!.*Loader=yaml\\.SafeLoader)"
+  - "(?s)yaml\\.load\\s*\\((?!.{0,80}Loader=yaml\\.SafeLoader)"
 description: >
   pickle.load/loads can execute arbitrary code while deserializing
   attacker-controlled data. yaml.load() without an explicit SafeLoader has

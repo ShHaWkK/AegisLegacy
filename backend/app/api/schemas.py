@@ -66,7 +66,7 @@ class RuleRead(BaseModel):
     patterns: list[str]
 
 
-class Page(BaseModel, Generic[T]):
+class Page(BaseModel, Generic[T]):  # noqa: UP046 - pydantic v2 exige Generic[T], pas la syntaxe PEP 695
     items: list[T]
     total: int
     page: int

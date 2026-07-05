@@ -3,8 +3,9 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from app.rules.paths import default_rules_dir
 
-from aegislegacy.config.settings import default_rules_dir, load_settings
+from aegislegacy.config.settings import load_settings
 
 
 def test_default_rules_dir_points_at_repo_rules_directory() -> None:

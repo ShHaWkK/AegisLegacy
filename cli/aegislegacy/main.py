@@ -15,6 +15,7 @@ from pathlib import Path
 import typer
 from app.domain.severity import Severity
 from app.rules.loader import RuleLoadError
+from app.services.scan_runner import ScanTargetNotFoundError
 from rich.console import Console
 
 from aegislegacy.commands.doctor import run_doctor
@@ -56,7 +57,7 @@ def scan(
 
     try:
         findings, score = perform_scan(path, settings.rules_dir)
-    except (FileNotFoundError, RuleLoadError) as exc:
+    except (ScanTargetNotFoundError, RuleLoadError) as exc:
         console.print(f"[bold red]Error:[/] {exc}")
         raise typer.Exit(code=1) from exc
 

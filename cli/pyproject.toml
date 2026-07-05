@@ -3,12 +3,7 @@ name = "aegislegacy-cli"
 version = "0.1.0"
 description = "AegisLegacy CLI: scan and score legacy Perl/Python codebases from the terminal."
 requires-python = ">=3.12"
-# Also depends at runtime on the `app` package from ../backend (rules engine,
-# domain, scoring). It is not listed as a PyPI dependency because this is a
-# monorepo path dependency: install both packages editable in the same
-# environment (see Makefile install-dev) rather than publishing `app`
-# separately. Tests fall back to a sys.path shim (see tests/conftest.py) so
-# they run even without installing.
+# Dépend aussi du package `app` dans ../backend. Installez les deux packages en mode editable.
 dependencies = [
     "typer>=0.12",
     "rich>=13.7",
@@ -38,9 +33,7 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
-# B008: Typer's documented API requires calling typer.Argument()/typer.Option()
-# in parameter defaults so it can introspect them; this is not the
-# mutable-default-argument footgun the rule targets.
+
 ignore = ["B008"]
 
 [tool.mypy]

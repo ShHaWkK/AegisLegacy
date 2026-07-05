@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from aegislegacy.commands.scan import perform_scan
+from aegislegacy.commands.scan import ScanTargetNotFoundError, perform_scan
 
 
 def test_perform_scan_detects_findings_in_directory(
@@ -35,5 +35,5 @@ def test_perform_scan_with_no_findings_gives_perfect_score(
 
 
 def test_perform_scan_raises_for_missing_target(tmp_path: Path, rules_dir: Path) -> None:
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(ScanTargetNotFoundError):
         perform_scan(tmp_path / "does-not-exist", rules_dir)

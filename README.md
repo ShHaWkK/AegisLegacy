@@ -40,7 +40,7 @@ flowchart LR
     end
     subgraph Consumers
         CLI[CLI - Typer - implemented]
-        API[Backend API - FastAPI]
+        API[Backend API - FastAPI - implemented]
         Agent[Perl agent]
         Report[HTML report]
     end
@@ -56,9 +56,14 @@ Layering (implemented so far in `backend/app`):
 - `domain/` — pure data models (`Severity`, `Language`, `Finding`). No I/O.
 - `rules/` — YAML schema validation (`schema.py`), loading (`loader.py`),
   and pattern matching against files (`engine.py`).
-- `services/` — orchestration on top of domain objects (`scoring.py`).
-- `api/`, `repositories/`, `workers/`, `reports/`, `security/`,
-  `observability/` — not implemented yet; see `ROADMAP.md`.
+- `services/` — orchestration on top of domain objects (`scoring.py`,
+  `scan_service.py`).
+- `repositories/` — SQLModel table models and a `ScanRepository` (SQLite).
+- `api/` — FastAPI schemas, dependencies (auth, DB session), routes.
+- `core/` — centralized `Settings` (env-driven, `AEGIS_` prefix).
+- `security/` — isolated API-key verification (constant-time compare).
+- `observability/` — structlog JSON logging setup.
+- `workers/`, `reports/` — not implemented yet; see `ROADMAP.md`.
 
 ## What's actually implemented right now
 
@@ -80,8 +85,22 @@ Layering (implemented so far in `backend/app`):
   directory present and loading correctly).
 - 21 passing tests (`cli/tests/`), `ruff check` clean, `mypy --strict` clean.
 - `report generate`, `score <scan_id>` and `diff` are intentionally **not**
-  registered yet — they need scan persistence (backend API), see
-  `ROADMAP.md`.
+  registered yet — see "Known scope gaps" in `ROADMAP.md`.
+
+**The backend API**, FastAPI + SQLModel on SQLite:
+
+- `POST /api/v1/scans` (API-key protected) — runs a scan synchronously and
+  persists it.
+- `GET /api/v1/scans` (paginated), `GET /api/v1/scans/{id}`,
+  `GET /api/v1/scans/{id}/findings`, `GET /api/v1/scans/{id}/score`.
+- `GET /api/v1/rules` — the loaded detection rules.
+- `GET /health`.
+- Centralized `Settings` (env-driven), structlog JSON logging,
+  constant-time API-key check isolated in `app/security/api_key.py`.
+- 83 passing tests (`backend/tests/`, including full API tests with an
+  in-memory SQLite override), `ruff check` clean, `mypy --strict` clean.
+- No HTML report endpoint yet (needs `app/reports`), no worker queue
+  (scans run in-request) — see `ROADMAP.md`.
 
 ### Try it
 
@@ -91,13 +110,20 @@ python -m venv .venv
 .venv/Scripts/activate          # or: source .venv/bin/activate
 pip install -e "backend[dev,api]" -e "cli[dev]"
 
-pytest backend/tests cli/tests   # 71 passed
+pytest backend/tests cli/tests   # 104 passed
 ruff check backend cli           # clean
 mypy backend/app                 # clean, strict mode
 mypy --config-file cli/pyproject.toml cli/aegislegacy  # clean, strict mode
 
 aegis rules list
 aegis scan ./rules               # try it on any path; demo-legacy-app is not built yet
+
+# run the API
+uvicorn app.main:app --app-dir backend --reload
+curl http://127.0.0.1:8000/health
+curl -X POST http://127.0.0.1:8000/api/v1/scans \
+  -H "Content-Type: application/json" -H "X-API-Key: changeme-local-dev-key" \
+  -d '{"target_path": "rules"}'
 ```
 
 ```python
@@ -116,10 +142,11 @@ print(result.score, result.classification)
 
 ## Stack
 
-- **Python**: 3.12+, pydantic v2, Typer, Rich, pytest, ruff, mypy (strict)
-  — implemented (rules engine + CLI).
-- **Perl 5**, **FastAPI**, **SQLModel**, **Jinja2** — planned, see
-  `ROADMAP.md`.
+- **Python**: 3.12+, pydantic v2, Typer, Rich, FastAPI, SQLModel (SQLite),
+  structlog, pytest, ruff, mypy (strict) — implemented (rules engine, CLI,
+  backend API).
+- **Perl 5**, **Jinja2** (HTML reports), Postgres/Redis/Celery — planned,
+  see `ROADMAP.md`.
 
 ## Why this project
 
@@ -128,7 +155,9 @@ the same bar before moving to the next: typed, tested, linted, and
 documented — rather than a wide surface of half-working scaffolding. The
 rules engine shipped first because the CLI, the API, and the Perl agent's
 JSON contract all depend on its `Finding` shape; the CLI shipped second
-because it validates that shape end-to-end with zero extra infrastructure.
+because it validates that shape end-to-end with zero extra infrastructure;
+the backend API shipped third, adding persistence (SQLite via SQLModel)
+and turning a one-off scan into a queryable, auditable history.
 
 ## Security note
 

@@ -20,6 +20,8 @@ def load_rule_file(path: Path) -> RuleDefinition:
         raw = yaml.safe_load(path.read_text(encoding="utf-8"))
     except yaml.YAMLError as exc:
         raise RuleLoadError(f"{path}: invalid YAML ({exc})") from exc
+    except (OSError, UnicodeDecodeError) as exc:
+        raise RuleLoadError(f"{path}: could not read rule file ({exc})") from exc
 
     if not isinstance(raw, dict):
         raise RuleLoadError(f"{path}: rule file must contain a YAML mapping")
@@ -33,10 +35,19 @@ def load_rule_file(path: Path) -> RuleDefinition:
 def load_rules_from_directory(directory: Path) -> list[RuleDefinition]:
     """Recursively load every *.yaml/*.yml rule under `directory`.
 
-    Raises RuleLoadError on the first invalid file, or if two rules share
-    the same id (ids must be globally unique so findings can be traced
-    back unambiguously to the rule that produced them).
+    Raises RuleLoadError if the directory doesn't exist, if any file fails
+    to parse or validate, or if two rules share the same id (ids must be
+    globally unique so findings can be traced back unambiguously to the
+    rule that produced them).
+
+    A missing directory raising loudly (rather than yielding zero rules)
+    matters here specifically: a mistyped --rules-dir/AEGIS_RULES_DIR would
+    otherwise make every scan silently report zero findings and a perfect
+    100/100 score instead of surfacing the misconfiguration.
     """
+    if not directory.is_dir():
+        raise RuleLoadError(f"Rules directory does not exist: {directory}")
+
     rule_files = sorted(
         [*directory.rglob("*.yaml"), *directory.rglob("*.yml")]
     )

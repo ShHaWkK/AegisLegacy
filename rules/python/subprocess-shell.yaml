@@ -3,7 +3,7 @@ language: python
 severity: critical
 title: subprocess call with shell=True
 patterns:
-  - "subprocess\\.(?:run|call|Popen|check_call|check_output)\\([^)]*shell\\s*=\\s*True"
+  - "subprocess\\.(?:run|call|Popen|check_call|check_output)\\((?:[^()]|\\([^()]*\\))*shell\\s*=\\s*True"
   - "os\\.(?:system|popen)\\s*\\("
 description: >
   shell=True (or os.system/os.popen) runs a command through the system
