@@ -27,9 +27,9 @@ cover_db/
 .env
 *.env.local
 !.env.example
-# Exception volontaire : demo-legacy-app/.env contient un faux secret,
-# commité exprès pour que le scanner ait quelque chose à détecter.
-!demo-legacy-app/.env
+# demo-legacy-app/.env n'est plus commité (même avec un faux secret,
+# on évite de le rendre visible publiquement) : config/app.conf couvre
+# déjà les mêmes règles de détection de secrets.
 
 # Reports (generated, keep samples only)
 reports/*.html
