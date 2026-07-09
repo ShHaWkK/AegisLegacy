@@ -5,6 +5,7 @@ use warnings;
 use utf8;
 use v5.16;
 
+use Cwd qw(abs_path);
 use File::Find ();
 use File::Spec;
 use Exporter qw(import);
@@ -19,15 +20,14 @@ Aegis::Collector - Parcourt un arbre de fichiers legacy et en extrait les métad
 
 =head1 DESCRIPTION
 
-Ne fait aucune détection : Collector se contente de trouver les fichiers
-pertinents et de calculer leurs métadonnées (taille, date, hash). La
-détection de patterns est le travail d'Aegis::Scanner.
+Ce module ne détecte rien : il se contente de trouver les fichiers qui
+nous intéressent et de récupérer leurs infos (taille, date, hash). La
+détection de patterns, c'est le boulot d'Aegis::Scanner juste après.
 
 =cut
 
-# Extensions surveillées par défaut, alignées sur le moteur Python
-# (backend/app/domain/language.py) pour rester cohérent entre les deux
-# scanners.
+# Les mêmes extensions que côté Python (backend/app/domain/language.py),
+# pour que les deux scanners regardent les mêmes fichiers.
 our @DEFAULT_EXTENSIONS = qw(.pl .pm .cgi .py .sh .conf .env);
 
 our @IGNORED_DIRECTORIES = qw(.git __pycache__ node_modules venv .venv blib _build .idea .vscode);
@@ -44,6 +44,11 @@ sub collect_files {
     my ($root, $extensions) = @_;
     $extensions //= \@DEFAULT_EXTENSIONS;
     my %wanted_ext = map { lc($_) => 1 } @$extensions;
+
+    # File::Find refuse de descendre correctement dans un chemin relatif
+    # sur certains Perl (observé sur ce Cygwin) : on résout toujours en
+    # absolu avant de parcourir, pour que ça marche partout pareil.
+    my $absolute_root = abs_path($root) // $root;
 
     my @files;
 
@@ -71,7 +76,7 @@ sub collect_files {
 
                 push @files, {
                     path          => $path,
-                    relative_path => relative_path($path, $root),
+                    relative_path => relative_path($path, $absolute_root),
                     extension     => $ext,
                     size          => $stat[7],
                     mtime         => $stat[9],
@@ -79,7 +84,7 @@ sub collect_files {
                 };
             },
         },
-        $root,
+        $absolute_root,
     );
 
     return \@files;

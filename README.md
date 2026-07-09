@@ -41,7 +41,7 @@ flowchart LR
     subgraph Consumers
         CLI[CLI - Typer - implemented]
         API[Backend API - FastAPI - implemented]
-        Agent[Perl agent]
+        Agent[Perl agent - implemented]
         Report[HTML report]
     end
     E --> CLI
@@ -102,7 +102,21 @@ Layering (implemented so far in `backend/app`):
 - No HTML report endpoint yet (needs `app/reports`), no worker queue
   (scans run in-request) — see `ROADMAP.md`.
 
-### Try it
+### Try it — the fast way (no manual setup)
+
+`aegis.ps1` (Windows/PowerShell) and `aegis.sh` (bash/git-bash/Linux/macOS)
+are self-installing wrappers: the first call creates the virtualenv and
+installs everything, later calls just run the CLI. Nothing to activate.
+
+```powershell
+.\aegis.ps1 scan demo-legacy-app
+```
+
+```bash
+./aegis.sh scan demo-legacy-app
+```
+
+### Try it — the manual way
 
 ```bash
 # from the repo root, one shared virtualenv for backend + cli
@@ -116,14 +130,17 @@ mypy backend/app                 # clean, strict mode
 mypy --config-file cli/pyproject.toml cli/aegislegacy  # clean, strict mode
 
 aegis rules list
-aegis scan ./rules               # try it on any path; demo-legacy-app is not built yet
+aegis scan demo-legacy-app
 
 # run the API
 uvicorn app.main:app --app-dir backend --reload
 curl http://127.0.0.1:8000/health
 curl -X POST http://127.0.0.1:8000/api/v1/scans \
   -H "Content-Type: application/json" -H "X-API-Key: changeme-local-dev-key" \
-  -d '{"target_path": "rules"}'
+  -d '{"target_path": "demo-legacy-app"}'
+
+# the Perl agent needs no install at all (core Perl modules only)
+perl agent-perl/bin/aegis-agent.pl --path demo-legacy-app
 ```
 
 ```python
@@ -145,8 +162,9 @@ print(result.score, result.classification)
 - **Python**: 3.12+, pydantic v2, Typer, Rich, FastAPI, SQLModel (SQLite),
   structlog, pytest, ruff, mypy (strict) — implemented (rules engine, CLI,
   backend API).
-- **Perl 5**, **Jinja2** (HTML reports), Postgres/Redis/Celery — planned,
-  see `ROADMAP.md`.
+- **Perl 5**, core modules only (`File::Find`, `Digest::SHA`, `JSON::PP`,
+  `HTTP::Tiny`, `Getopt::Long`) — implemented (`agent-perl/`).
+- **Jinja2** (HTML reports), Postgres/Redis/Celery — planned, see `ROADMAP.md`.
 
 ## Why this project
 
@@ -162,8 +180,8 @@ and turning a one-off scan into a queryable, auditable history.
 ## Security note
 
 This is a defensive tool. Any intentionally vulnerable code lives only
-under `demo-legacy-app/` (not yet added) as inert, local-only fixtures for
-detection demos — never real secrets, never offensive tooling.
+under `demo-legacy-app/` as inert, local-only fixtures for detection demos
+— never real secrets, never offensive tooling.
 
 ## License
 

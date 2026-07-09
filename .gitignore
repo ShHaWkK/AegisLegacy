@@ -27,6 +27,9 @@ cover_db/
 .env
 *.env.local
 !.env.example
+# Exception volontaire : demo-legacy-app/.env contient un faux secret,
+# commité exprès pour que le scanner ait quelque chose à détecter.
+!demo-legacy-app/.env
 
 # Reports (generated, keep samples only)
 reports/*.html
@@ -43,6 +46,7 @@ reports/*.json
 .idea/
 .DS_Store
 Thumbs.db
+.playwright-mcp/
 
 # Node (dashboard, if Next.js chosen)
 node_modules/

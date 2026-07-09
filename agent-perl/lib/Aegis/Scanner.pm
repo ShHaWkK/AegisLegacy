@@ -15,14 +15,12 @@ Aegis::Scanner - Détection de patterns simples, ligne par ligne.
 
 =head1 DESCRIPTION
 
-Contrairement au moteur Python (backend/app/rules), cet agent n'a
-volontairement PAS de dépendance YAML : la liste des dépendances Perl du
-projet (voir cpanfile) se limite à des modules cœur (File::Find, JSON::PP,
-Digest::SHA, HTTP::Tiny, Getopt::Long, Test::More). Le jeu de règles
-ci-dessous est donc un sous-ensemble volontairement léger de règles à
-haute valeur, pas une réimplémentation complète du moteur de règles
-Python — la source de vérité pour la détection exhaustive reste
-backend/app/rules avec ses règles YAML.
+Ici on n'a pas repris le système de règles YAML du moteur Python : ça
+aurait voulu dire ajouter une dépendance externe, alors qu'on voulait que
+cet agent tourne avec juste les modules cœur de Perl. Du coup les règles
+ci-dessous sont codées en dur, en petit nombre, sur les cas les plus
+parlants. Si tu cherches la détection complète et à jour, c'est le moteur
+Python (backend/app/rules) qu'il faut regarder.
 
 =cut
 

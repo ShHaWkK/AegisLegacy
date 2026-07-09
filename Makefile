@@ -16,7 +16,7 @@ test-python:
 	pytest cli/tests
 
 test-perl:
-	cd agent-perl && prove -l t/
+	cd agent-perl && for f in t/*.t; do perl "$$f" || exit 1; done
 
 lint:
 	cd backend && ruff check .
@@ -41,7 +41,7 @@ run-worker:
 	@echo "Le worker n'est pas encore implémenté dans cette itération (l'édition core n'inclut pas Celery/RQ, voir ROADMAP.md)."
 
 scan-demo:
-	@echo "Les fixtures demo-legacy-app ne sont pas encore implémentées. En attendant, exécutez : aegis scan <path-to-any-legacy-project>"
+	aegis scan demo-legacy-app
 
 report-demo:
 	@echo "HTML report generation not implemented yet in this iteration (see ROADMAP.md)."

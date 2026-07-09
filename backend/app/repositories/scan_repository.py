@@ -42,9 +42,12 @@ class ScanRepository:
 
     def list_scans(self, *, offset: int, limit: int) -> tuple[list[ScanRecord], int]:
         total = self._session.exec(select(func.count()).select_from(ScanRecord)).one()
+        # created_at seul ne suffit pas : deux scans créés dans la même
+        # microseconde auraient un ordre indéterminé. On départage avec
+        # l'id, qui lui est toujours strictement croissant.
         statement = (
             select(ScanRecord)
-            .order_by(col(ScanRecord.created_at).desc())
+            .order_by(col(ScanRecord.created_at).desc(), col(ScanRecord.id).desc())
             .offset(offset)
             .limit(limit)
         )

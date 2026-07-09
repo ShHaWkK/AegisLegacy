@@ -16,15 +16,14 @@ Aegis::Utils - Petites fonctions utilitaires partagées par l'agent.
 
 =head1 DESCRIPTION
 
-Rien de spécifique au métier ici : hachage, lecture de fichier, calcul de
-chemin relatif. Ces fonctions sont utilisées par Aegis::Collector et
-Aegis::Scanner.
+Juste des petites briques utilisées par Collector et Scanner : hacher un
+fichier, le lire, calculer un chemin relatif. Rien de plus.
 
 =cut
 
-# Heuristique simple : un octet NUL dans les premiers Ko indique un fichier
-# binaire. Ce n'est pas parfait mais suffit pour éviter de scanner des
-# fichiers .db, images, etc.
+# Un octet NUL dans les premiers Ko, ça sent le fichier binaire. C'est une
+# heuristique toute simple, pas infaillible, mais ça suffit à écarter les
+# .db, images, etc. sans se compliquer la vie.
 sub is_binary_content {
     my ($content) = @_;
     return 0 unless defined $content;
@@ -32,9 +31,9 @@ sub is_binary_content {
     return index($sample, "\0") >= 0 ? 1 : 0;
 }
 
-# Lit un fichier en entier. Retourne undef (sans mourir) si le fichier est
-# illisible ou binaire, plutôt que de faire planter tout le scan pour un
-# seul fichier problématique dans un gros arbre legacy.
+# Lit tout le fichier d'un coup. Si c'est illisible ou binaire, on renvoie
+# undef plutôt que de planter — un fichier bizarre ne doit pas faire
+# tomber le scan de tout un arbre legacy.
 sub read_text_file {
     my ($path) = @_;
 
@@ -60,9 +59,9 @@ sub sha256_hex_of_file {
     return $sha->hexdigest;
 }
 
-# Chemin de $path relatif à $root, avec des séparateurs '/' partout (même
-# sous Windows) pour que le JSON produit soit stable quelle que soit la
-# plateforme d'exécution de l'agent.
+# Chemin de $path relatif à $root. On met des '/' partout, même sous
+# Windows, pour que le JSON de sortie soit le même quelle que soit la
+# machine sur laquelle tourne l'agent.
 sub relative_path {
     my ($path, $root) = @_;
 

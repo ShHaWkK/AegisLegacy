@@ -41,9 +41,9 @@ Sans --output ni --api, le rapport JSON est simplement affiché sur STDOUT.
 
 =cut
 
-# Pas de Pod::Usage : ce module n'est pas garanti disponible sur toutes les
-# installations Perl minimales (il est absent par défaut de ce Cygwin par
-# exemple), alors qu'aucun autre module du projet n'a cette contrainte.
+# On n'utilise pas Pod::Usage : sur ce Cygwin par exemple, il n'est même
+# pas installé par défaut. Autant faire un affichage d'aide à la main que
+# de rajouter une dépendance qui peut manquer.
 sub print_usage {
     print <<'USAGE';
 Usage : aegis-agent.pl --path DOSSIER [--output FICHIER.json] [--api URL]

@@ -12,13 +12,13 @@ starts — no shallow scaffolding left pretending to be finished.
 | Demo rule set (`rules/`) | **Done** | 8 rules across Perl, Python and secrets categories. |
 | CLI (`cli/`) | **Done** | Typer + Rich: `aegis scan`, `aegis rules list`, `aegis doctor`. 21 tests, ruff + mypy strict clean. `report generate`/`score <scan_id>`/`diff` need scan persistence (see below) and are intentionally not registered yet. |
 | Backend API (`backend/app/api`, `core`, `repositories`, `services`, `security`, `observability`) | **Done** | FastAPI + SQLModel on SQLite. `POST/GET /api/v1/scans`, `/scans/{id}`, `/scans/{id}/findings`, `/scans/{id}/score`, `GET /api/v1/rules`, `GET /health`. API-key auth on the write endpoint, pagination on list, structlog JSON logging. 83 tests, ruff + mypy strict clean. |
-| Agent Perl (`agent-perl/`) | **Done** | Standalone Perl 5 agent, core-modules only (no cpan install needed): `Aegis::Collector` (walk + hash + metadata), `Aegis::Scanner` (4 hardcoded high-value rules), `Aegis::Reporter` (JSON to file or HTTP POST). `bin/aegis-agent.pl` verified end-to-end against a live vulnerable fixture. `t/*.t` (Test::More) written and manually traced against the implementation; not yet machine-executed in this session due to a tool-level outage — run `prove -l agent-perl/t` to confirm. |
+| Agent Perl (`agent-perl/`) | **Done** | Standalone Perl 5 agent, core-modules only (no cpan install needed): `Aegis::Collector` (walk + hash + metadata), `Aegis::Scanner` (4 hardcoded high-value rules), `Aegis::Reporter` (JSON to file or HTTP POST). `bin/aegis-agent.pl` verified end-to-end against a live vulnerable fixture. 5 test files, 17 subtests, all passing (`make test-perl`, which runs each `.t` directly with `perl` rather than `prove` — see note below). |
 | Reporting (`backend/app/reports`) | Not started | Jinja2 HTML report from scan results. |
-| Demo legacy app (`demo-legacy-app/`) | Not started | Deliberately vulnerable, local-only, defensive-use fixtures. |
+| Demo legacy app (`demo-legacy-app/`) | **Done** | 6 deliberately vulnerable files (2 Perl, 2 Python, a `.env`, a config file) exercising all 8 demo rules. Only fake secrets, no offensive payloads. Verified with the CLI, the API and the Perl agent — all three agree on the findings. |
 | Modernization Advisor (`rules/modernization`) | Not started | Heuristics mapping legacy patterns to migration recommendations. |
 | CI/CD (`.github/workflows`) | Not started | |
 | `.claude/` (rules, skills, hooks) | Not started | |
-| Docs (`docs/`) | Not started | |
+| Docs (`docs/`) | Partial | `demo-script.md` and `interview-pitch.md` done. `architecture.md`, `threat-model.md`, `security-model.md`, `rules-engine.md`, `modernization-strategy.md`, `ci-cd.md` not started. |
 
 ## Why this order
 
@@ -73,6 +73,25 @@ real files with zero additional infrastructure (no DB, no HTTP).
   ahead for `Loader=yaml.SafeLoader`). This is an inherent limit of
   regex-based detection, not a bug to "finish" — an AST-based scanner would
   be the next tier of accuracy, out of scope for the core edition.
+- `prove` (the standard Perl test runner) is broken on the Cygwin Perl
+  used to build this repo — it's missing `TAP::Harness::Env`, a module
+  that isn't part of a minimal Cygwin Perl install. `make test-perl` works
+  around this by running each `t/*.t` file directly with `perl`, which
+  needs no extra module. On a Perl install with a working `prove`, `prove
+  -l agent-perl/t` works too.
+- Portability note (already fixed, kept for context): `Aegis::Collector`
+  used to hand a relative path straight to `File::Find::find`, which
+  silently found zero files on this repo's Cygwin Perl when given a
+  relative `--path`. It now resolves the path with `Cwd::abs_path` first.
+  Caught by actually running the agent against `demo-legacy-app` with a
+  relative path — the unit tests alone hadn't caught it, since
+  `File::Temp::tempdir()` always returns an absolute path. A regression
+  test now covers the relative-path case explicitly (`t/collector.t`).
+- The Perl agent's `--api` flag POSTs its own self-contained JSON report
+  to a URL as-is. It does not (yet) match the backend's `POST
+  /api/v1/scans` contract, which expects `{"target_path": "..."}` and runs
+  the scan itself in Python — there's no endpoint today for ingesting
+  pre-computed findings from the Perl agent. See `agent-perl/README.md`.
 
 ## Scope decisions for this iteration ("core" edition)
 
